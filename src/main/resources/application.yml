@@ -31,18 +31,10 @@ spring:
                 allowed-headers: "*"
 
           routes:
-            - id: bolling-payment-service
-              uri: http://localhost:9094
-              predicates:
-                - Path=/api/v1/invoices/**,
-                  /api/v1/payments/**, /api/v1/plans/**, 
-                  /api/va/subscriptions/**, /api/v1/webhooks
-
             - id: plan-catalog-service
-              uri: http://localhost:9092
+              uri: http://localhost:9098
               predicates:
-                - Path=/api/v1/products/**,/api/v1/plans/**,
-                  /api/v1/features/**,/api/v1/catalog/**
+                - Path=/api/v1/products/**, /api/v1/plans/**, /api/v1/features/**, /api/v1/catalog/**
               filters:
                 - name: CircuitBreaker
                   args:
@@ -50,7 +42,7 @@ spring:
                     fallbackUri: forward:/fallback/catalog
 
             - id: subscription-service
-              uri: http://localhost:9093
+              uri: http://localhost:9097
               predicates:
                 - Path=/api/v1/customers/**,/api/v1/subscriptions/**
               filters:
@@ -60,9 +52,16 @@ spring:
                     fallbackUri: forward:/fallback/subscription
 
             - id: user-service
-              uri: http://localhost:9090
+              uri: http://localhost:8090
               predicates:
                 - Path=/api/v1/users/**,/api/v1/org/**
+
+            - id: billing-payment-service
+              uri: http://localhost:9099
+              predicates:
+                - Path=/api/v1/billing/invoices/**,
+                  /api/v1/billing/payments/**, /api/v1/billing/plans/**,
+                  /api/v1/billing/subscriptions/**, /api/v1/billing/webhooks
 
 # ---------------------------------------------------------------------------
 # Actuator / management
@@ -111,7 +110,7 @@ gateway:
     ttl-seconds: 30
 
 user-service:
-  url: http://localhost:9090
+  url: http://localhost:8090
 
 # Must match user-service's internal.api-key
 internal:
