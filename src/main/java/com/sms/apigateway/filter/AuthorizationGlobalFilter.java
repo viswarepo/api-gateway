@@ -29,7 +29,7 @@ public class AuthorizationGlobalFilter implements GlobalFilter, Ordered {
     private static final String ADMIN = "ADMIN";
 
     private static final Set<String> CATALOG_MANAGEMENT_PREFIXES = Set.of(
-            "/api/v1/products/*", "/api/v1/plans/*", "/api/v1/features");
+            "/api/v1/products/*", "/api/v1/plans/*", "/api/v1/features/*");
 
     private final GatewayResponseWriter responseWriter;
 

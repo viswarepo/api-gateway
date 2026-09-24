@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCredentialsResponse {
-    private Long id;
+    private String id;
     private String username;
     private String passwordHash;
     private Set<String> roles;
