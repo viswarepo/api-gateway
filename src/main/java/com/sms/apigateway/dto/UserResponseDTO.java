@@ -13,15 +13,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserResponseDTO {
     private String id;
-    private String organizationId;
     private String username;
     private String password;
     private String email;
-    private String firstName;
-    private String lastName;
+    private String fullName;
+    private String role;
+    private String organizationId;
+    private String organizationName;
     private String customerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    //private Set<String> roles;
-    private String role;
 }

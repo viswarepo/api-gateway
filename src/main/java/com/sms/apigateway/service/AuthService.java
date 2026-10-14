@@ -75,6 +75,7 @@ public class AuthService {
                 .userId(credentials.getId())
                 .username(credentials.getUsername())
                 .organizationId(credentials.getOrganizationId())
+                .organizationName(credentials.getOrganizationName())
                 .customerId(credentials.getCustomerId())
                 .role(credentials.getRole())
                 .email(credentials.getEmail())

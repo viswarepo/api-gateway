@@ -1,14 +1,19 @@
 package com.sms.apigateway.web;
 
-import com.sms.apigateway.dto.AuthResponse;
-import com.sms.apigateway.dto.LoginRequest;
+import com.sms.apigateway.client.UserServiceClient;
+import com.sms.apigateway.dto.*;
+import com.sms.apigateway.event.UserEvent;
+import com.sms.apigateway.producer.AlertForgotPasswordEventProducer;
 import com.sms.apigateway.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.Map;
 
 /**
  * Issues a JWT for a valid username/password, checked against user-service
@@ -32,9 +37,13 @@ import reactor.core.scheduler.Schedulers;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserServiceClient userServiceClient;
+    private final AlertForgotPasswordEventProducer alertForgotPasswordEventProducer;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserServiceClient userServiceClient, AlertForgotPasswordEventProducer alertForgotPasswordEventProducer) {
+        this.alertForgotPasswordEventProducer = alertForgotPasswordEventProducer;
         this.authService = authService;
+        this.userServiceClient = userServiceClient;
     }
 
     /*@PostMapping("/login")
@@ -56,5 +65,44 @@ public class AuthController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
 
+            String identifier = request.getIdentifier();
+            boolean isEmail = identifier.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+            UserResponseDTO user;
+            if (isEmail) {
+                // Lookup by email
+                user = userServiceClient.getByEmail(identifier);
+            } else {
+                // Lookup by username
+                user = userServiceClient.getUserByUsername(identifier);
+            }
+            // Verify user exists in User Service
+            //UserDto users = userServiceClient.findUser(request.getOrgId(), request.getUsername());
+
+            // Build reset link (frontend route)
+            String resetLink = "http://localhost:/8090/api/va/users/reset-password/"
+                    + user.getUsername();
+
+            // TODO: send resetLink via email/SMS
+            UserEvent userEvent =UserEvent.of(
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getFullName(),
+                    user.getOrganizationId()
+            );
+            alertForgotPasswordEventProducer.alertForgotPassword(userEvent);
+
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Password reset link sent,Check your email "+user.getEmail(),
+                    "resetLink", resetLink
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Failed to process forgot password, Enter regitered email/username"));
+        }
+    }
 }
