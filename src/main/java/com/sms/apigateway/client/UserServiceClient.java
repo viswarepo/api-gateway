@@ -57,7 +57,51 @@ public class UserServiceClient {
     }
 
     public UserDto getByUsername(String username) {
-        String url = userServiceBaseUrl + "/api/v1/users" + username;
+        String url = userServiceBaseUrl + "/api/v1/users/" + username;
+        try {
+            return restTemplate.getForObject(url, UserDto.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new InvalidCredentialsException("User not found: " + username);
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            log.error("user-service unreachable while fetching user {}", username, e);
+            throw new UserServiceUnavailableException("user-service is currently unavailable", e);
+        }
+    }
+
+    public UserResponseDTO getUserByUsername(String username) {
+        String url = userServiceBaseUrl + "/api/v1/users/username/" + username;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<RegisterRequest> entity = new HttpEntity<>(headers);
+
+            return restTemplate.getForObject(url, UserResponseDTO.class,entity);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new InvalidCredentialsException("User not found: " + username);
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            log.error("user-service unreachable while fetching user {}", username, e);
+            throw new UserServiceUnavailableException("user-service is currently unavailable", e);
+        }
+    }
+
+    public UserResponseDTO getByEmail(String email) {
+        String url = userServiceBaseUrl + "/api/v1/users/email/" + email;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<RegisterRequest> entity = new HttpEntity<>(headers);
+
+            return restTemplate.getForObject(url, UserResponseDTO.class,entity);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new InvalidCredentialsException("User not found: " + email);
+        } catch (HttpServerErrorException | ResourceAccessException e) {
+            log.error("user-service unreachable while fetching user {}", email, e);
+            throw new UserServiceUnavailableException("user-service is currently unavailable", e);
+        }
+    }
+
+    public UserDto findUser(String orgId, String username) {
+        String url = userServiceBaseUrl + "/api/v1/users" +orgId+"/"+ username;
         try {
             return restTemplate.getForObject(url, UserDto.class);
         } catch (HttpClientErrorException.NotFound e) {

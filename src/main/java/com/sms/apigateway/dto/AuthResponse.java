@@ -16,6 +16,7 @@ public class AuthResponse {
     private String userId;
     private String username;
     private String organizationId;
+    private String organizationName;
     private String customerId;
     //private Set<String> roles;
     private String role;

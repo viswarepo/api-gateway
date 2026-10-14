@@ -32,7 +32,7 @@ spring:
 
           routes:
             - id: plan-catalog-service
-              uri: http://localhost:9098
+              uri: http://localhost:9088
               predicates:
                 - Path=/api/v1/products/**, /api/v1/plans/**, /api/v1/features/**, /api/v1/catalog/**
               filters:
@@ -60,8 +60,13 @@ spring:
               uri: http://localhost:9099
               predicates:
                 - Path=/api/v1/billing/invoices/**,
-                  /api/v1/billing/payments/**, /api/v1/billing/plans/**,
+                  /api/v1/billing/payments/**, /api/v1/billing/plans/**, /api/v1/billing/dashboard/**,
                   /api/v1/billing/subscriptions/**, /api/v1/billing/webhooks
+
+            - id: alert-service
+              uri: http://localhost:9095
+              predicates:
+                - Path=/api/v1/notifications/**, /api/v1/notification-templates/**, /api/v1/webhooks/**
 
 # ---------------------------------------------------------------------------
 # Actuator / management
